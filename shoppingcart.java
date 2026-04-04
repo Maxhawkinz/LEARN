@@ -1,3 +1,4 @@
+// shopping cart program
 import java.util.Scanner;
 
 public class shoppingcart {
