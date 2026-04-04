@@ -1,3 +1,4 @@
+//this code is of mad lib game. here we use user input strings and inputs to make an intresting story. which is hilaroius,casual or maybe non sensical.
 import java.util.Scanner;
 
 public class madlibs {
