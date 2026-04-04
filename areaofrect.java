@@ -1,3 +1,5 @@
+// This code takes user input and gives area of rectangle.
+// for better understanding of user input and datatypes.
 import java.util.Scanner;
 
 public class areaofrect {
