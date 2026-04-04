@@ -1,4 +1,5 @@
-// for variable and datatype
+// for understanding of  variable and datatype
+
 public class Datatype {
 
     public static void main(String[] args){
