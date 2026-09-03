@@ -1,0 +1,138 @@
+import heapq
+
+class PuzzleNode:
+    def __init__(self, state, parent=None, move="", g=0, h=0):
+        self.state = state          # Tuple representing puzzle state
+        self.parent = parent        # Parent node
+        self.move = move            # Move taken to reach this state
+        self.g = g                  # Cost from start
+        self.h = h                  # Heuristic cost
+        self.f = g + h              # Total cost
+
+    def __lt__(self, other):
+        return self.f < other.f
+
+
+def calculate_manhattan_distance(state, goal):
+    distance = 0
+    for i in range(9):
+        tile = state[i]
+        if tile != 0:  # Ignore blank tile
+            current_row, current_col = divmod(i, 3)
+            goal_index = goal.index(tile)
+            goal_row, goal_col = divmod(goal_index, 3)
+
+            distance += abs(current_row - goal_row) + abs(current_col - goal_col)
+
+    return distance
+
+
+def get_neighbors(node, goal):
+    neighbors = []
+
+    empty_idx = node.state.index(0)
+    row, col = divmod(empty_idx, 3)
+
+    moves = {
+        "Up": (-1, 0),
+        "Down": (1, 0),
+        "Left": (0, -1),
+        "Right": (0, 1)
+    }
+
+    for move, (dr, dc) in moves.items():
+        new_row = row + dr
+        new_col = col + dc
+
+        if 0 <= new_row < 3 and 0 <= new_col < 3:
+            new_empty_idx = new_row * 3 + new_col
+
+            new_state = list(node.state)
+            new_state[empty_idx], new_state[new_empty_idx] = (
+                new_state[new_empty_idx],
+                new_state[empty_idx],
+            )
+
+            new_state = tuple(new_state)
+
+            h_cost = calculate_manhattan_distance(new_state, goal)
+
+            child = PuzzleNode(
+                state=new_state,
+                parent=node,
+                move=move,
+                g=node.g + 1,
+                h=h_cost,
+            )
+
+            neighbors.append(child)
+
+    return neighbors
+
+
+def solve_8_puzzle(start_state, goal_state):
+    open_list = []
+    closed_set = set()
+
+    start_h = calculate_manhattan_distance(start_state, goal_state)
+    start_node = PuzzleNode(start_state, g=0, h=start_h)
+
+    heapq.heappush(open_list, start_node)
+
+    while open_list:
+        current_node = heapq.heappop(open_list)
+
+        if current_node.state == goal_state:
+            path = []
+
+            while current_node.parent:
+                path.append((current_node.move, current_node.state))
+                current_node = current_node.parent
+
+            return path[::-1]
+
+        closed_set.add(current_node.state)
+
+        for neighbor in get_neighbors(current_node, goal_state):
+            if neighbor.state not in closed_set:
+                heapq.heappush(open_list, neighbor)
+
+    return None
+
+
+def print_board(state):
+    for i in range(0, 9, 3):
+        print(list(state[i:i + 3]))
+    print("-" * 15)
+
+
+if __name__ == "__main__":
+
+    start = (
+        0, 1, 2,
+        5, 6, 3,
+        4, 7, 8
+    )
+
+    goal = (
+        1, 2, 3,
+        4, 5, 6,
+        7, 8, 0
+    )
+
+    print("Initial State:")
+    print_board(start)
+
+    print("Executing A* Search Algorithm...\n")
+
+    solution_steps = solve_8_puzzle(start, goal)
+
+    if solution_steps:
+        print(f"Solution Found in {len(solution_steps)} moves!\n")
+
+        for step_num, (move, state) in enumerate(solution_steps, start=1):
+            print(f"Step {step_num}: Move Blank Space '{move}'")
+            print_board(state)
+
+    else:
+        print("No valid solution found.")
